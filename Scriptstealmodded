@@ -1,0 +1,142 @@
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local StealAnimalRemote = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("StealAnimal")
+local Plots = workspace:WaitForChild("Plots")
+local Players = game:GetService("Players")
+local Player = Players.LocalPlayer
+local PlayerGui = Player:WaitForChild("PlayerGui")
+local UserInputService = game:GetService("UserInputService")
+
+local validAnimalNames = {
+	["La Vacca Saturno Saturnita"] = true,
+	["Los tralaleritos"] = true,
+	["Graipuss Medussi"] = true,
+	["La Grande Combinasion"] = true,
+	["Garama and Madundung"] = true,
+	["Sammyni Spyderini"] = true,
+}
+
+-- Reset do jogador ao executar
+task.spawn(function()
+	local character = Player.Character or Player.CharacterAdded:Wait()
+	local humanoid = character:FindFirstChildOfClass("Humanoid")
+	if humanoid then
+		humanoid:TakeDamage(100)
+	end
+end)
+
+-- Armazenar posição ao respawn
+local savedPosition = nil
+Player.CharacterAdded:Connect(function(char)
+	char:WaitForChild("HumanoidRootPart")
+	task.wait(1)
+	savedPosition = char.HumanoidRootPart.Position
+end)
+
+-- Criar GUI
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "StealAnimalGui"
+screenGui.ResetOnSpawn = false
+screenGui.IgnoreGuiInset = true
+screenGui.Parent = PlayerGui
+
+local frame = Instance.new("Frame")
+frame.Size = UDim2.new(0, 200, 0, 80)
+frame.Position = UDim2.new(0.5, -100, 0.1, 0)
+frame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+frame.BorderSizePixel = 0
+frame.BackgroundTransparency = 0.1
+frame.Active = true
+frame.Draggable = true
+frame.Parent = screenGui
+
+-- Drag mobile
+local dragging = false
+local dragInput, dragStart, startPos
+
+frame.InputBegan:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+		dragging = true
+		dragStart = input.Position
+		startPos = frame.Position
+
+		input.Changed:Connect(function()
+			if input.UserInputState == Enum.UserInputState.End then
+				dragging = false
+			end
+		end)
+	end
+end)
+
+frame.InputChanged:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+		dragInput = input
+	end
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+	if input == dragInput and dragging then
+		local delta = input.Position - dragStart
+		frame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+	end
+end)
+
+-- Botão de roubo
+local stealButton = Instance.new("TextButton")
+stealButton.Size = UDim2.new(1, -20, 0, 40)
+stealButton.Position = UDim2.new(0, 10, 0, 20)
+stealButton.Text = "Steal brainrots"
+stealButton.BackgroundColor3 = Color3.fromRGB(60, 130, 60)
+stealButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+stealButton.Font = Enum.Font.GothamBold
+stealButton.TextSize = 16
+stealButton.Parent = frame
+
+-- Botão de fechar
+local closeButton = Instance.new("TextButton")
+closeButton.Size = UDim2.new(0, 25, 0, 25)
+closeButton.Position = UDim2.new(1, -30, 0, 5)
+closeButton.Text = "X"
+closeButton.BackgroundColor3 = Color3.fromRGB(200, 60, 60)
+closeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+closeButton.Font = Enum.Font.Gotham
+closeButton.TextSize = 14
+closeButton.Parent = frame
+
+-- Função de roubo
+local function stealAnimals()
+	for _, plot in pairs(Plots:GetChildren()) do
+		local podiums = plot:FindFirstChild("AnimalPodiums")
+		if podiums then
+			for _, podium in pairs(podiums:GetChildren()) do
+				local animalGroup = podium:FindFirstChild("Animal")
+				if animalGroup then
+					for _, animal in pairs(animalGroup:GetChildren()) do
+						if validAnimalNames[animal.Name] then
+							task.spawn(function()
+								StealAnimalRemote:FireServer(animal)
+							end)
+						end
+					end
+				end
+			end
+		end
+	end
+
+	-- Voltar para a posição salva
+	if savedPosition then
+		local char = Player.Character
+		if char and char:FindFirstChild("HumanoidRootPart") then
+			char:MoveTo(savedPosition)
+		end
+	end
+end
+
+-- Conectar botão de roubo
+stealButton.MouseButton1Click:Connect(function()
+	stealAnimals()
+end)
+
+-- Conectar botão de fechar
+closeButton.MouseButton1Click:Connect(function()
+	screenGui:Destroy()
+end)
