@@ -8,7 +8,7 @@ local UserInputService = game:GetService("UserInputService")
 
 local validAnimalNames = {
 	["La Vacca Saturno Saturnita"] = true,
-	["Los tralaleritos"] = true,
+	["Los Tralaleritos"] = true,
 	["Graipuss Medussi"] = true,
 	["La Grande Combinasion"] = true,
 	["Garama and Madundung"] = true,
