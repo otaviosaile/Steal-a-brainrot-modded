@@ -13,6 +13,13 @@ local validAnimalNames = {
 	["La Grande Combinasion"] = true,
 	["Garama and Madundung"] = true,
 	["Sammyni Spyderini"] = true,
+	["Torrtuginni Dragonfrutini"] = true,
+	["Las Tralaleritas"] = true,
+	["Chicleteira Bicicleteira"] = true,
+	["Pot Hotspot"] = true,
+	["Secret Lucky Block"] = true,
+	["Las Vaquitas Saturnitas"]
+
 }
 
 -- Reset do jogador ao executar
