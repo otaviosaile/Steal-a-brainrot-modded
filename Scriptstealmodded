@@ -19,6 +19,7 @@ local validAnimalNames = {
 	["Pot Hotspot"] = true,
 	["Secret Lucky Block"] = true,
 	["Las Vaquitas Saturnitas"] = true,
+	["Nuclearo Dinossauro"] = true,
 
 }
 
